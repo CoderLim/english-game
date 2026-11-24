@@ -1,3 +1,61 @@
-# English Adventure
+# English Adventure · 友谊森林
 
-An open-source, textbook-aligned English adventure for young learners. The first playable MVP is developed on a feature branch.
+一款原创的**人教 PEP（2024 新版）三年级上册教材对齐英语冒险游戏**。通过情境听力、选择题、身体部位点击任务、主动回忆和跨天间隔复习，帮助孩子在游戏中学英语。
+
+> 当前是 **Unit 1 前两关可玩 MVP**，不是整册课程，也不是 Unit 1 的完整教学产品。与人民教育出版社无隶属关系。
+
+## 启动
+
+需 Node.js 20.19+ 或 22.12+。
+
+```bash
+npm install
+npm run dev
+```
+
+浏览器访问 Vite 输出的本地地址（通常是 http://localhost:5173）。
+
+```bash
+npm run test
+npm run build
+```
+
+## 已实现
+
+- 🗺️ 森林地图，PEP 三上 6 个单元及复习单元（仅 Unit 1 前两关开放）。
+- 🦊 **第一关：森林里的新朋友** — 打招呼、自我介绍、初次见面回应，以及一次无文字提示的口语自评。
+- 🤖 **第二关：机器人需要帮助** — 听英语，点击机器人耳朵、眼睛、嘴巴、手或手臂，最后进行口语回忆。
+- 🧠 **间隔复习引擎** — 1 / 3 / 7 / 14 / 30 天初始梯度；同日重复不会升多级；提供新的复习题型/提示。
+- 📊 家长报告 — 展示本地作答、复习进度、不同能力维度；明确标记口语是自评。
+- 💾 本地保存 — 浏览器 localStorage 保存，不需要账号，不采集/上传录音。
+- 🔊 浏览器 Web Speech API 提供英语朗读；不支持时可显示文字提示继续学习。
+
+## 重要限制
+
+1. **音频依赖浏览器的语音合成环境**。不是教材原声音频，质量因系统而异；后续需要制作并审核独立音频资源。
+2. 当前没有语音识别或发音评分；“我独立说对了”属于孩子的自我评价。
+3. 第一单元课程蓝图规划了六关，但 Mission 03–06 未实现。内容覆盖与通关状态必须如实显示。
+4. 没有服务器或多设备同步；清除浏览器数据会丢失记录。
+5. 仅用于早期玩法与学习引擎验证，不替代正式教材和教师教学。
+
+## 项目结构
+
+```
+src/
+  App.tsx                 # 场景、挑战流程、家长报告
+  components/             # 原创森林、狐狸、机器人 SVG
+  content/unit1.ts        # 教材映射与原创关卡/复习内容
+  engine/types.ts         # 知识点、任务、学习记录
+  engine/review.ts        # 间隔调度、持久化
+  engine/review.test.ts   # 状态机与内容完整性测试
+docs/
+  CONTENT_SPEC.md         # 全册蓝图与来源
+  ACCEPTANCE.md           # 验收和未完成范围
+```
+
+## 官方教材参考
+
+- [PEP 三年级上册官方教材目录](https://www.pep.com.cn/zslth/yyptypzj/xypep/3s/)
+- [人教 PEP 2024 新版教材介绍](https://www.pep.com.cn/xw/zt/hd/12/xjcjs/xx/202409/t20240920_1995564.html)
+
+内容使用原创角色、场景、语句及题目，不复刻教材课文、图画或音频。后续上线前需继续进行教学专家审校、真实儿童可用性测试、延迟学习效果测试。

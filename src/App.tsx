@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { selectEnglishVoice } from './engine/speech';
 import { knowledgePoints, missions, pointMap, textbook, units } from './content/unit1';
 import { ForestLandscape, FoxIllustration } from './components/ForestArt';
 import { RobotArt, type RobotBodyPart } from './components/RobotArt';
@@ -21,21 +22,70 @@ function Character({ kind, interactive = false, onSelect, selected }: {
 }
 function SpeakButton({ text, onUnavailable }: { text: string; onUnavailable: () => void }) {
   const [playing, setPlaying] = useState(false);
-  function play() {
-    if (!('speechSynthesis' in window)) { onUnavailable(); return; }
+  const [voiceName, setVoiceName] = useState<string | null>(null);
+  const activeUtterance = useRef<SpeechSynthesisUtterance | null>(null);
+
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return;
+    const synth = window.speechSynthesis;
+    const refreshVoice = () => setVoiceName(selectEnglishVoice(synth.getVoices())?.name ?? null);
+    refreshVoice();
+    synth.addEventListener?.('voiceschanged', refreshVoice);
+    return () => {
+      synth.removeEventListener?.('voiceschanged', refreshVoice);
+      activeUtterance.current = null;
+      synth.cancel();
+    };
+  }, []);
+
+  function play(slow: boolean) {
+    if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
+      onUnavailable();
+      return;
+    }
     try {
-      window.speechSynthesis.cancel();
+      const synth = window.speechSynthesis;
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.85;
-      utterance.pitch = 1.06;
-      utterance.onstart = () => setPlaying(true);
-      utterance.onend = () => setPlaying(false);
-      utterance.onerror = () => { setPlaying(false); onUnavailable(); };
-      window.speechSynthesis.speak(utterance);
-    } catch { setPlaying(false); onUnavailable(); }
+      const voice = selectEnglishVoice(synth.getVoices());
+      if (voice) {
+        utterance.voice = voice;
+        setVoiceName(voice.name);
+      }
+      utterance.lang = voice?.lang ?? 'en-US';
+      utterance.rate = slow ? 0.7 : 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      activeUtterance.current = utterance;
+      utterance.onstart = () => {
+        if (activeUtterance.current === utterance) setPlaying(true);
+      };
+      utterance.onend = () => {
+        if (activeUtterance.current === utterance) setPlaying(false);
+      };
+      utterance.onerror = (event) => {
+        if (activeUtterance.current !== utterance) return;
+        setPlaying(false);
+        if (event.error !== 'canceled' && event.error !== 'interrupted') onUnavailable();
+      };
+      synth.cancel();
+      synth.speak(utterance);
+    } catch {
+      setPlaying(false);
+      onUnavailable();
+    }
   }
-  return <button type="button" className="speak-button" onClick={play} aria-label="播放英语语音">🔊 {playing ? '播放中…' : '听英语发音'} <span aria-hidden="true">↗</span></button>;
+
+  return (
+    <div className="audio-controls">
+      <button type="button" className="speak-button" onClick={() => play(false)} aria-label="正常速度播放英语">
+        🔊 {playing ? '重新播放英语' : '播放英语'}
+      </button>
+      <button type="button" className="speak-button speak-button--slow" onClick={() => play(true)} aria-label="慢速播放英语">
+        🐢 慢速重听
+      </button>
+      <span className="audio-voice-note">{voiceName ? '系统英语语音' : '使用系统语音'} · 听不清可以点“看文字提示”</span>
+    </div>
+  );
 }
 function ChallengeView({ challenge, mission, feedback, revealed, transcript, onAnswer, onSelfGrade, onReveal, onTranscript, onNext }: {
   challenge: Challenge; mission: Mission | null; feedback: Feedback | null; revealed: boolean; transcript: boolean;

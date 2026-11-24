@@ -9,15 +9,16 @@
 需 Node.js 20.19+ 或 22.12+。
 
 ```bash
-npm install
-npm run dev
+corepack enable
+pnpm install
+pnpm dev
 ```
 
 浏览器访问 Vite 输出的本地地址（通常是 http://localhost:5173）。
 
 ```bash
-npm run test
-npm run build
+pnpm test
+pnpm build
 ```
 
 ## 已实现

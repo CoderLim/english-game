@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { findReviewChallenge, knowledgePoints, missions, pointMap, textbook, units } from './content/unit1';
+import { knowledgePoints, missions, pointMap, textbook, units } from './content/unit1';
 import { ForestLandscape, FoxIllustration } from './components/ForestArt';
 import { RobotArt, type RobotBodyPart } from './components/RobotArt';
 import { completeMission, createEmptyState, getDueEntries, getReviewQueue, loadState, persistState, recordAttempt } from './engine/review';
